@@ -14,25 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains Kubernetes API for the DIP provider.
-package apis
+// Package provisioning contains Provisioning API versions.
+package provisioning
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	iamv1alpha1 "github.com/crossplane/provider-template/apis/iam/v1alpha1"
-	mdmv1alpha1 "github.com/crossplane/provider-template/apis/mdm/v1alpha1"
 	provisioningv1alpha1 "github.com/crossplane/provider-template/apis/provisioning/v1alpha1"
-	dipv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 )
 
 func init() {
-	AddToSchemes = append(AddToSchemes,
-		dipv1alpha1.SchemeBuilder.AddToScheme,
-		iamv1alpha1.SchemeBuilder.AddToScheme,
-		mdmv1alpha1.SchemeBuilder.AddToScheme,
-		provisioningv1alpha1.SchemeBuilder.AddToScheme,
-	)
+	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
+	AddToSchemes = append(AddToSchemes, provisioningv1alpha1.SchemeBuilder.AddToScheme)
 }
 
 // AddToSchemes may be used to add all resources defined in the project to a Scheme.

@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/philips-software/go-dip-api/connect/mdm"
+	"github.com/philips-software/go-dip-api/connect/provisioning"
 	"github.com/philips-software/go-dip-api/iam"
 )
 
@@ -34,10 +35,11 @@ type Config struct {
 	ServicePrivateKey string
 }
 
-// Client wraps go-dip-api IAM and MDM clients.
+// Client wraps go-dip-api IAM, MDM, and Provisioning clients.
 type Client struct {
-	IAM *iam.Client
-	MDM *mdm.Client
+	IAM          *iam.Client
+	MDM          *mdm.Client
+	Provisioning *provisioning.Client
 }
 
 // NewClient creates a new DIP client from config.
@@ -82,7 +84,16 @@ func NewClient(cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("failed to create MDM client: %w", err)
 	}
 
-	return &Client{IAM: iamClient, MDM: mdmClient}, nil
+	// Create Provisioning client using the authenticated IAM client
+	provisioningClient, err := provisioning.NewClient(iamClient, &provisioning.Config{
+		Region:      cfg.Region,
+		Environment: cfg.Environment,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Provisioning client: %w", err)
+	}
+
+	return &Client{IAM: iamClient, MDM: mdmClient, Provisioning: provisioningClient}, nil
 }
 
 // ConfigFromSecret parses config from ProviderConfig spec and secret JSON.

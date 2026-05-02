@@ -34,6 +34,7 @@ import (
 	"github.com/crossplane/provider-template/internal/controller/organization"
 	"github.com/crossplane/provider-template/internal/controller/passwordpolicy"
 	"github.com/crossplane/provider-template/internal/controller/proposition"
+	provisioningorgconfiguration "github.com/crossplane/provider-template/internal/controller/provisioning/orgconfiguration"
 	"github.com/crossplane/provider-template/internal/controller/role"
 	"github.com/crossplane/provider-template/internal/controller/service"
 	"github.com/crossplane/provider-template/internal/controller/user"
@@ -62,6 +63,8 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		mdmdevicegroup.Setup,
 		mdmdevicetype.Setup,
 		mdmauthenticationmethod.Setup,
+		// Provisioning resources
+		provisioningorgconfiguration.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
