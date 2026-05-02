@@ -25,6 +25,12 @@ import (
 	"github.com/crossplane/provider-template/internal/controller/config"
 	"github.com/crossplane/provider-template/internal/controller/emailtemplate"
 	"github.com/crossplane/provider-template/internal/controller/group"
+	mdmapplication "github.com/crossplane/provider-template/internal/controller/mdm/application"
+	mdmauthenticationmethod "github.com/crossplane/provider-template/internal/controller/mdm/authenticationmethod"
+	mdmdevicegroup "github.com/crossplane/provider-template/internal/controller/mdm/devicegroup"
+	mdmdevicetype "github.com/crossplane/provider-template/internal/controller/mdm/devicetype"
+	mdmproposition "github.com/crossplane/provider-template/internal/controller/mdm/proposition"
+	mdmstandardservice "github.com/crossplane/provider-template/internal/controller/mdm/standardservice"
 	"github.com/crossplane/provider-template/internal/controller/organization"
 	"github.com/crossplane/provider-template/internal/controller/passwordpolicy"
 	"github.com/crossplane/provider-template/internal/controller/proposition"
@@ -38,6 +44,7 @@ import (
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
 		config.Setup,
+		// IAM resources
 		organization.Setup,
 		group.Setup,
 		role.Setup,
@@ -48,6 +55,13 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		user.Setup,
 		emailtemplate.Setup,
 		passwordpolicy.Setup,
+		// MDM resources
+		mdmproposition.Setup,
+		mdmapplication.Setup,
+		mdmstandardservice.Setup,
+		mdmdevicegroup.Setup,
+		mdmdevicetype.Setup,
+		mdmauthenticationmethod.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err

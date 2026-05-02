@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/philips-software/go-dip-api/connect/mdm"
 	"github.com/philips-software/go-dip-api/iam"
 )
 
@@ -33,9 +34,10 @@ type Config struct {
 	ServicePrivateKey string
 }
 
-// Client wraps go-dip-api IAM client.
+// Client wraps go-dip-api IAM and MDM clients.
 type Client struct {
 	IAM *iam.Client
+	MDM *mdm.Client
 }
 
 // NewClient creates a new DIP client from config.
@@ -71,7 +73,16 @@ func NewClient(cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("failed to authenticate service identity '%s': %w", cfg.ServiceID, err)
 	}
 
-	return &Client{IAM: iamClient}, nil
+	// Create MDM client using the authenticated IAM client
+	mdmClient, err := mdm.NewClient(iamClient, &mdm.Config{
+		Region:      cfg.Region,
+		Environment: cfg.Environment,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create MDM client: %w", err)
+	}
+
+	return &Client{IAM: iamClient, MDM: mdmClient}, nil
 }
 
 // ConfigFromSecret parses config from ProviderConfig spec and secret JSON.
