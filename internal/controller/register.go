@@ -20,16 +20,34 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/crossplane/provider-template/internal/controller/application"
+	"github.com/crossplane/provider-template/internal/controller/client"
 	"github.com/crossplane/provider-template/internal/controller/config"
-	"github.com/crossplane/provider-template/internal/controller/mytype"
+	"github.com/crossplane/provider-template/internal/controller/emailtemplate"
+	"github.com/crossplane/provider-template/internal/controller/group"
+	"github.com/crossplane/provider-template/internal/controller/organization"
+	"github.com/crossplane/provider-template/internal/controller/passwordpolicy"
+	"github.com/crossplane/provider-template/internal/controller/proposition"
+	"github.com/crossplane/provider-template/internal/controller/role"
+	"github.com/crossplane/provider-template/internal/controller/service"
+	"github.com/crossplane/provider-template/internal/controller/user"
 )
 
-// SetupGated creates all Template controllers with safe-start support and adds them to
+// SetupGated creates all DIP controllers with safe-start support and adds them to
 // the supplied manager.
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
 		config.Setup,
-		mytype.SetupGated,
+		organization.Setup,
+		group.Setup,
+		role.Setup,
+		proposition.Setup,
+		application.Setup,
+		client.Setup,
+		service.Setup,
+		user.Setup,
+		emailtemplate.Setup,
+		passwordpolicy.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
