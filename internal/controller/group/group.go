@@ -35,6 +35,7 @@ import (
 	iamv1alpha1 "github.com/crossplane/provider-template/apis/iam/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 	"github.com/crossplane/provider-template/internal/clients/dip"
+	"github.com/crossplane/provider-template/internal/util"
 )
 
 const (
@@ -126,8 +127,15 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 
-	group, _, err := e.client.IAM.Groups.GetGroupByID(externalName)
+	if !util.IsValidUUID(externalName) {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+
+	group, resp, err := e.client.IAM.Groups.GetGroupByID(externalName)
 	if err != nil {
+		if resp != nil && util.IsNotFoundOrInvalidID(resp.StatusCode()) {
+			return managed.ExternalObservation{ResourceExists: false}, nil
+		}
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot get group")
 	}
 	if group == nil {

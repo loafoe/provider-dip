@@ -35,6 +35,7 @@ import (
 	iamv1alpha1 "github.com/crossplane/provider-template/apis/iam/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 	"github.com/crossplane/provider-template/internal/clients/dip"
+	"github.com/crossplane/provider-template/internal/util"
 )
 
 const (
@@ -126,8 +127,16 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 
-	prop, _, err := e.client.IAM.Propositions.GetPropositionByID(externalName)
+	// If external-name is not a valid UUID, treat as "doesn't exist yet"
+	if !util.IsValidUUID(externalName) {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+
+	prop, resp, err := e.client.IAM.Propositions.GetPropositionByID(externalName)
 	if err != nil {
+		if resp != nil && util.IsNotFoundOrInvalidID(resp.StatusCode()) {
+			return managed.ExternalObservation{ResourceExists: false}, nil
+		}
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot get proposition")
 	}
 	if prop == nil {

@@ -19,9 +19,10 @@ package dip
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/philips-software/go-dip-api/iam"
-	"github.com/philips-software/go-nih-signer"
 )
 
 // Config holds DIP client configuration.
@@ -52,21 +53,22 @@ func NewClient(cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("service_private_key is required")
 	}
 
-	// Create signer for service authentication
-	signer, err := signer.New(cfg.ServiceID, cfg.ServicePrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create signer: %w", err)
-	}
-
+	// Create IAM client
 	iamClient, err := iam.NewClient(nil, &iam.Config{
 		Region:      cfg.Region,
 		Environment: cfg.Environment,
-		SharedKey:   cfg.ServiceID,
-		SecretKey:   cfg.ServicePrivateKey,
-		Signer:      signer,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create IAM client: %w", err)
+	}
+
+	// Authenticate using service identity (JWT-based OAuth2)
+	err = iamClient.ServiceLogin(iam.Service{
+		ServiceID:  cfg.ServiceID,
+		PrivateKey: cfg.ServicePrivateKey,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to authenticate service identity '%s': %w", cfg.ServiceID, err)
 	}
 
 	return &Client{IAM: iamClient}, nil
@@ -95,5 +97,53 @@ func ConfigFromSecret(specRegion, specEnv string, secretData []byte) (Config, er
 		cfg.Environment = v
 	}
 
+	// Fix private key format if needed (add newlines every 64 chars)
+	cfg.ServicePrivateKey = formatPrivateKey(cfg.ServicePrivateKey)
+
+	// Validate required fields
+	if cfg.Region == "" {
+		return Config{}, fmt.Errorf("region is required: set in ProviderConfig spec or credentials secret")
+	}
+	if cfg.Environment == "" {
+		return Config{}, fmt.Errorf("environment is required: set in ProviderConfig spec or credentials secret")
+	}
+	if cfg.ServiceID == "" {
+		return Config{}, fmt.Errorf("service_id is required in credentials secret")
+	}
+	if cfg.ServicePrivateKey == "" {
+		return Config{}, fmt.Errorf("service_private_key is required in credentials secret")
+	}
+
 	return cfg, nil
+}
+
+// formatPrivateKey ensures the private key has proper PEM formatting with newlines.
+func formatPrivateKey(key string) string {
+	// If already properly formatted, return as-is
+	if strings.Contains(key, "\n") {
+		return key
+	}
+
+	// Extract header, body, and footer
+	re := regexp.MustCompile(`(-----BEGIN [A-Z ]+-----)(.+)(-----END [A-Z ]+-----)`)
+	matches := re.FindStringSubmatch(key)
+	if len(matches) != 4 {
+		return key
+	}
+
+	header := matches[1]
+	body := matches[2]
+	footer := matches[3]
+
+	// Split body into 64-character lines
+	var lines []string
+	for i := 0; i < len(body); i += 64 {
+		end := i + 64
+		if end > len(body) {
+			end = len(body)
+		}
+		lines = append(lines, body[i:end])
+	}
+
+	return header + "\n" + strings.Join(lines, "\n") + "\n" + footer
 }

@@ -33,9 +33,28 @@ type ClientParameters struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="name is immutable"
 	Name string `json:"name"`
 
+	// Type of the client. Either "Public" or "Confidential". Immutable after creation.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=Public;Confidential
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="type is immutable"
+	Type string `json:"type"`
+
+	// ClientID is the OAuth2 client_id. Must be 5-20 characters. Immutable after creation.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=5
+	// +kubebuilder:validation:MaxLength=20
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="clientId is immutable"
+	ClientID string `json:"clientId"`
+
+	// PasswordSecretRef references a Secret containing the client password.
+	// Password must be 8-16 chars with at least one capital, number, special char.
+	// Immutable after creation.
+	// +kubebuilder:validation:Required
+	PasswordSecretRef xpv1.SecretKeySelector `json:"passwordSecretRef"`
+
 	// Description of the client.
-	// +optional
-	Description *string `json:"description,omitempty"`
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
 
 	// ApplicationID is the application GUID this client belongs to.
 	// +optional

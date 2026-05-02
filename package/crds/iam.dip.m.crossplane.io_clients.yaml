@@ -141,6 +141,15 @@ spec:
                             type: string
                         type: object
                     type: object
+                  clientId:
+                    description: ClientID is the OAuth2 client_id. Must be 5-20 characters.
+                      Immutable after creation.
+                    maxLength: 20
+                    minLength: 5
+                    type: string
+                    x-kubernetes-validations:
+                    - message: clientId is immutable
+                      rule: self == oldSelf
                   consentImplied:
                     description: ConsentImplied skips user consent screen.
                     type: boolean
@@ -169,6 +178,26 @@ spec:
                     x-kubernetes-validations:
                     - message: name is immutable
                       rule: self == oldSelf
+                  passwordSecretRef:
+                    description: |-
+                      PasswordSecretRef references a Secret containing the client password.
+                      Password must be 8-16 chars with at least one capital, number, special char.
+                      Immutable after creation.
+                    properties:
+                      key:
+                        description: The key to select.
+                        type: string
+                      name:
+                        description: Name of the secret.
+                        type: string
+                      namespace:
+                        description: Namespace of the secret.
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
                   redirectionURIs:
                     description: RedirectionURIs for OAuth2 redirects.
                     items:
@@ -188,9 +217,23 @@ spec:
                     items:
                       type: string
                     type: array
+                  type:
+                    description: Type of the client. Either "Public" or "Confidential".
+                      Immutable after creation.
+                    enum:
+                    - Public
+                    - Confidential
+                    type: string
+                    x-kubernetes-validations:
+                    - message: type is immutable
+                      rule: self == oldSelf
                 required:
+                - clientId
+                - description
                 - globalReferenceId
                 - name
+                - passwordSecretRef
+                - type
                 type: object
               managementPolicies:
                 default:

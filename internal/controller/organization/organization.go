@@ -35,6 +35,7 @@ import (
 	iamv1alpha1 "github.com/crossplane/provider-template/apis/iam/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 	"github.com/crossplane/provider-template/internal/clients/dip"
+	"github.com/crossplane/provider-template/internal/util"
 )
 
 const (
@@ -126,8 +127,18 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 
-	org, _, err := e.client.IAM.Organizations.GetOrganizationByID(externalName)
+	// Check if external-name looks like a UUID (basic check)
+	// If not, treat it as "resource doesn't exist yet"
+	if !util.IsValidUUID(externalName) {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+
+	org, resp, err := e.client.IAM.Organizations.GetOrganizationByID(externalName)
 	if err != nil {
+		// If 400 (invalid ID) or 404 (not found), treat as "doesn't exist"
+		if resp != nil && (resp.StatusCode() == 400 || resp.StatusCode() == 404) {
+			return managed.ExternalObservation{ResourceExists: false}, nil
+		}
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot get organization")
 	}
 	if org == nil {

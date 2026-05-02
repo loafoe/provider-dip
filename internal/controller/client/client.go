@@ -28,6 +28,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/philips-software/go-dip-api/iam"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -35,6 +36,7 @@ import (
 	iamv1alpha1 "github.com/crossplane/provider-template/apis/iam/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
 	"github.com/crossplane/provider-template/internal/clients/dip"
+	"github.com/crossplane/provider-template/internal/util"
 )
 
 const (
@@ -43,6 +45,7 @@ const (
 	errGetPC        = "cannot get ProviderConfig"
 	errGetCreds     = "cannot get credentials"
 	errNewClient    = "cannot create DIP client"
+	errGetPassword  = "cannot get password from secret"
 )
 
 // Setup adds a controller that reconciles Client managed resources.
@@ -108,11 +111,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.Wrap(err, errNewClient)
 	}
 
-	return &external{client: dipClient}, nil
+	return &external{client: dipClient, kube: c.kube, namespace: m.GetNamespace()}, nil
 }
 
 type external struct {
-	client *dip.Client
+	client    *dip.Client
+	kube      client.Client
+	namespace string
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
@@ -126,8 +131,15 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 
-	appClient, _, err := e.client.IAM.Clients.GetClientByID(externalName)
+	if !util.IsValidUUID(externalName) {
+		return managed.ExternalObservation{ResourceExists: false}, nil
+	}
+
+	appClient, resp, err := e.client.IAM.Clients.GetClientByID(externalName)
 	if err != nil {
+		if resp != nil && util.IsNotFoundOrInvalidID(resp.StatusCode()) {
+			return managed.ExternalObservation{ResourceExists: false}, nil
+		}
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot get client")
 	}
 	if appClient == nil {
@@ -152,11 +164,37 @@ func (e *external) isUpToDate(cr *iamv1alpha1.Client, appClient *iam.Application
 	if fp.Name != appClient.Name {
 		return false
 	}
-	if fp.Description != nil && *fp.Description != appClient.Description {
+	if fp.Description != appClient.Description {
 		return false
 	}
-	// Note: OAuth2 settings are more complex and would need deeper comparison
 	return true
+}
+
+func (e *external) getPassword(ctx context.Context, ref xpv1.SecretKeySelector, namespace string) (string, error) {
+	nn := types.NamespacedName{
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
+	}
+	if nn.Namespace == "" {
+		nn.Namespace = namespace
+	}
+
+	secret := &corev1.Secret{}
+	if err := e.kube.Get(ctx, nn, secret); err != nil {
+		return "", errors.Wrap(err, "cannot get secret")
+	}
+
+	key := ref.Key
+	if key == "" {
+		key = "password"
+	}
+
+	password, ok := secret.Data[key]
+	if !ok {
+		return "", errors.Errorf("secret %s/%s does not have key %s", nn.Namespace, nn.Name, key)
+	}
+
+	return string(password), nil
 }
 
 func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
@@ -169,15 +207,20 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	fp := cr.Spec.ForProvider
 
-	appClient := iam.ApplicationClient{
-		Name:              fp.Name,
-		GlobalReferenceID: fp.GlobalReferenceID,
-		Type:              "Public",
+	password, err := e.getPassword(ctx, fp.PasswordSecretRef, e.namespace)
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, errGetPassword)
 	}
 
-	if fp.Description != nil {
-		appClient.Description = *fp.Description
+	appClient := iam.ApplicationClient{
+		Name:              fp.Name,
+		Type:              fp.Type,
+		ClientID:          fp.ClientID,
+		Password:          password,
+		Description:       fp.Description,
+		GlobalReferenceID: fp.GlobalReferenceID,
 	}
+
 	if fp.ApplicationID != nil {
 		appClient.ApplicationID = *fp.ApplicationID
 	}
@@ -227,12 +270,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	appClient := iam.ApplicationClient{
 		ID:                meta.GetExternalName(cr),
 		Name:              fp.Name,
+		Description:       fp.Description,
 		GlobalReferenceID: fp.GlobalReferenceID,
 	}
 
-	if fp.Description != nil {
-		appClient.Description = *fp.Description
-	}
 	if fp.ApplicationID != nil {
 		appClient.ApplicationID = *fp.ApplicationID
 	}
