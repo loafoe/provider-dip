@@ -23,13 +23,15 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "iam.dip.m.crossplane.io"
+	// APIGroup is the group name for IAM resources.
+	APIGroup = "iam.dip.m.crossplane.io"
+	// Version is the API version.
 	Version = "v1alpha1"
 )
 
 var (
 	// SchemeGroupVersion is group version used to register these objects.
-	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
+	SchemeGroupVersion = schema.GroupVersion{Group: APIGroup, Version: Version}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme.
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
