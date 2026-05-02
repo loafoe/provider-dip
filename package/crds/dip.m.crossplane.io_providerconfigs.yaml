@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: providerconfigs.template.crossplane.io
+  name: providerconfigs.dip.m.crossplane.io
 spec:
-  group: template.crossplane.io
+  group: dip.m.crossplane.io
   names:
     categories:
     - crossplane
