@@ -41,7 +41,6 @@ import (
 const (
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
-	errGetCPC       = "cannot get ClusterProviderConfig"
 	errGetCreds     = "cannot get credentials"
 
 	errNewClient = "cannot create new Service"
@@ -127,30 +126,25 @@ func (c *connector) Connect(ctx context.Context, cr *v1alpha1.MyType) (managed.T
 		return nil, errors.Wrap(err, errTrackPCUsage)
 	}
 
-	var cd apisv1alpha1.ProviderCredentials
-
 	ref := cr.GetProviderConfigReference()
 
-	switch ref.Kind {
-	case "ProviderConfig":
-		pc := &apisv1alpha1.ProviderConfig{}
-		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: cr.GetNamespace()}, pc); err != nil {
-			return nil, errors.Wrap(err, errGetPC)
-		}
-		cd = pc.Spec.Credentials
-	case "ClusterProviderConfig":
-		cpc := &apisv1alpha1.ClusterProviderConfig{}
-		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name}, cpc); err != nil {
-			return nil, errors.Wrap(err, errGetCPC)
-		}
-		cd = cpc.Spec.Credentials
-	default:
-		return nil, errors.Errorf("unsupported provider config kind: %s", ref.Kind)
+	pc := &apisv1alpha1.ProviderConfig{}
+	if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: cr.GetNamespace()}, pc); err != nil {
+		return nil, errors.Wrap(err, errGetPC)
 	}
 
-	data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
-	if err != nil {
-		return nil, errors.Wrap(err, errGetCreds)
+	cd := pc.Spec.Credentials
+
+	var data []byte
+	var err error
+
+	if cd.SecretRef != nil {
+		data, err = resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, xpv1.CommonCredentialSelectors{
+			SecretRef: cd.SecretRef,
+		})
+		if err != nil {
+			return nil, errors.Wrap(err, errGetCreds)
+		}
 	}
 
 	svc, err := c.newServiceFn(data)
