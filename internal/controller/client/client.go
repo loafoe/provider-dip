@@ -197,30 +197,7 @@ func (e *external) getPassword(ctx context.Context, ref xpv1.SecretKeySelector, 
 	return string(password), nil
 }
 
-func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*iamv1alpha1.Client)
-	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotClient)
-	}
-
-	cr.Status.SetConditions(xpv1.Creating())
-
-	fp := cr.Spec.ForProvider
-
-	password, err := e.getPassword(ctx, fp.PasswordSecretRef, e.namespace)
-	if err != nil {
-		return managed.ExternalCreation{}, errors.Wrap(err, errGetPassword)
-	}
-
-	appClient := iam.ApplicationClient{
-		Name:              fp.Name,
-		Type:              fp.Type,
-		ClientID:          fp.ClientID,
-		Password:          password,
-		Description:       fp.Description,
-		GlobalReferenceID: fp.GlobalReferenceID,
-	}
-
+func applyOptionalFields(appClient *iam.ApplicationClient, fp *iamv1alpha1.ClientParameters) {
 	if fp.ApplicationID != nil {
 		appClient.ApplicationID = *fp.ApplicationID
 	}
@@ -248,6 +225,33 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if fp.IDTokenLifetime != nil {
 		appClient.IDTokenLifetime = int(*fp.IDTokenLifetime)
 	}
+}
+
+func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	cr, ok := mg.(*iamv1alpha1.Client)
+	if !ok {
+		return managed.ExternalCreation{}, errors.New(errNotClient)
+	}
+
+	cr.Status.SetConditions(xpv1.Creating())
+
+	fp := cr.Spec.ForProvider
+
+	password, err := e.getPassword(ctx, fp.PasswordSecretRef, e.namespace)
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, errGetPassword)
+	}
+
+	appClient := iam.ApplicationClient{
+		Name:              fp.Name,
+		Type:              fp.Type,
+		ClientID:          fp.ClientID,
+		Password:          password,
+		Description:       fp.Description,
+		GlobalReferenceID: fp.GlobalReferenceID,
+	}
+
+	applyOptionalFields(&appClient, &fp)
 
 	created, _, err := e.client.IAM.Clients.CreateClient(appClient)
 	if err != nil {
@@ -274,27 +278,7 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		GlobalReferenceID: fp.GlobalReferenceID,
 	}
 
-	if fp.ApplicationID != nil {
-		appClient.ApplicationID = *fp.ApplicationID
-	}
-	if fp.RedirectionURIs != nil {
-		appClient.RedirectionURIs = fp.RedirectionURIs
-	}
-	if fp.ResponseTypes != nil {
-		appClient.ResponseTypes = fp.ResponseTypes
-	}
-	if fp.ConsentImplied != nil {
-		appClient.ConsentImplied = *fp.ConsentImplied
-	}
-	if fp.AccessTokenLifetime != nil {
-		appClient.AccessTokenLifetime = int(*fp.AccessTokenLifetime)
-	}
-	if fp.RefreshTokenLifetime != nil {
-		appClient.RefreshTokenLifetime = int(*fp.RefreshTokenLifetime)
-	}
-	if fp.IDTokenLifetime != nil {
-		appClient.IDTokenLifetime = int(*fp.IDTokenLifetime)
-	}
+	applyOptionalFields(&appClient, &fp)
 
 	_, _, err := e.client.IAM.Clients.UpdateClient(appClient)
 	if err != nil {

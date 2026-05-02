@@ -154,49 +154,27 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 func (e *external) isUpToDate(cr *iamv1alpha1.PasswordPolicy, policy *iam.PasswordPolicy) bool {
 	fp := cr.Spec.ForProvider
-
-	if fp.MinLength != nil && *fp.MinLength != policy.Complexity.MinLength {
-		return false
+	c := policy.Complexity
+	checks := []struct {
+		spec   *int
+		actual int
+	}{
+		{fp.MinLength, c.MinLength},
+		{fp.MaxLength, c.MaxLength},
+		{fp.MinLowercase, c.MinLowerCase},
+		{fp.MinUppercase, c.MinUpperCase},
+		{fp.MinNumeric, c.MinNumerics},
+		{fp.MinSpecialChars, c.MinSpecialChars},
 	}
-	if fp.MaxLength != nil && *fp.MaxLength != policy.Complexity.MaxLength {
-		return false
-	}
-	if fp.MinLowercase != nil && *fp.MinLowercase != policy.Complexity.MinLowerCase {
-		return false
-	}
-	if fp.MinUppercase != nil && *fp.MinUppercase != policy.Complexity.MinUpperCase {
-		return false
-	}
-	if fp.MinNumeric != nil && *fp.MinNumeric != policy.Complexity.MinNumerics {
-		return false
-	}
-	if fp.MinSpecialChars != nil && *fp.MinSpecialChars != policy.Complexity.MinSpecialChars {
-		return false
+	for _, check := range checks {
+		if check.spec != nil && *check.spec != check.actual {
+			return false
+		}
 	}
 	return true
 }
 
-func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*iamv1alpha1.PasswordPolicy)
-	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotPasswordPolicy)
-	}
-
-	cr.Status.SetConditions(xpv1.Creating())
-
-	fp := cr.Spec.ForProvider
-
-	policy := iam.PasswordPolicy{}
-
-	if fp.ManagingOrganizationID != nil {
-		policy.ManagingOrganization = *fp.ManagingOrganizationID
-	}
-	if fp.ExpiryPeriodInDays != nil {
-		policy.ExpiryPeriodInDays = *fp.ExpiryPeriodInDays
-	}
-	if fp.HistoryCount != nil {
-		policy.HistoryCount = *fp.HistoryCount
-	}
+func applyComplexityFields(policy *iam.PasswordPolicy, fp *iamv1alpha1.PasswordPolicyParameters) {
 	if fp.MinLength != nil {
 		policy.Complexity.MinLength = *fp.MinLength
 	}
@@ -215,6 +193,19 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if fp.MinSpecialChars != nil {
 		policy.Complexity.MinSpecialChars = *fp.MinSpecialChars
 	}
+}
+
+func applyPolicyFields(policy *iam.PasswordPolicy, fp *iamv1alpha1.PasswordPolicyParameters) {
+	if fp.ManagingOrganizationID != nil {
+		policy.ManagingOrganization = *fp.ManagingOrganizationID
+	}
+	if fp.ExpiryPeriodInDays != nil {
+		policy.ExpiryPeriodInDays = *fp.ExpiryPeriodInDays
+	}
+	if fp.HistoryCount != nil {
+		policy.HistoryCount = *fp.HistoryCount
+	}
+	applyComplexityFields(policy, fp)
 	if fp.ChallengesEnabled != nil {
 		policy.ChallengesEnabled = *fp.ChallengesEnabled
 	}
@@ -227,6 +218,18 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 			policy.ChallengePolicy.MaxIncorrectAttempts = *fp.ChallengePolicy.MaxIncorrectAttempts
 		}
 	}
+}
+
+func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	cr, ok := mg.(*iamv1alpha1.PasswordPolicy)
+	if !ok {
+		return managed.ExternalCreation{}, errors.New(errNotPasswordPolicy)
+	}
+
+	cr.Status.SetConditions(xpv1.Creating())
+
+	policy := iam.PasswordPolicy{}
+	applyPolicyFields(&policy, &cr.Spec.ForProvider)
 
 	created, _, err := e.client.IAM.PasswordPolicies.CreatePasswordPolicy(policy)
 	if err != nil {
@@ -244,51 +247,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.New(errNotPasswordPolicy)
 	}
 
-	fp := cr.Spec.ForProvider
-
 	policy := iam.PasswordPolicy{
 		ID: meta.GetExternalName(cr),
 	}
-
-	if fp.ManagingOrganizationID != nil {
-		policy.ManagingOrganization = *fp.ManagingOrganizationID
-	}
-	if fp.ExpiryPeriodInDays != nil {
-		policy.ExpiryPeriodInDays = *fp.ExpiryPeriodInDays
-	}
-	if fp.HistoryCount != nil {
-		policy.HistoryCount = *fp.HistoryCount
-	}
-	if fp.MinLength != nil {
-		policy.Complexity.MinLength = *fp.MinLength
-	}
-	if fp.MaxLength != nil {
-		policy.Complexity.MaxLength = *fp.MaxLength
-	}
-	if fp.MinLowercase != nil {
-		policy.Complexity.MinLowerCase = *fp.MinLowercase
-	}
-	if fp.MinUppercase != nil {
-		policy.Complexity.MinUpperCase = *fp.MinUppercase
-	}
-	if fp.MinNumeric != nil {
-		policy.Complexity.MinNumerics = *fp.MinNumeric
-	}
-	if fp.MinSpecialChars != nil {
-		policy.Complexity.MinSpecialChars = *fp.MinSpecialChars
-	}
-	if fp.ChallengesEnabled != nil {
-		policy.ChallengesEnabled = *fp.ChallengesEnabled
-	}
-	if fp.ChallengePolicy != nil {
-		policy.ChallengePolicy = &iam.ChallengePolicy{}
-		if fp.ChallengePolicy.DefaultQuestions != nil {
-			policy.ChallengePolicy.DefaultQuestions = fp.ChallengePolicy.DefaultQuestions
-		}
-		if fp.ChallengePolicy.MaxIncorrectAttempts != nil {
-			policy.ChallengePolicy.MaxIncorrectAttempts = *fp.ChallengePolicy.MaxIncorrectAttempts
-		}
-	}
+	applyPolicyFields(&policy, &cr.Spec.ForProvider)
 
 	_, _, err := e.client.IAM.PasswordPolicies.UpdatePasswordPolicy(policy)
 	if err != nil {
