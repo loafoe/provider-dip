@@ -1,0 +1,27 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Client
+metadata:
+  name: example-client
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-client
+    description: An example OAuth2 client
+    applicationRef:
+      name: example-application
+    globalReferenceId: example-client-global-id
+    redirectionURIs:
+      - https://example.com/callback
+    responseTypes:
+      - code
+    scopes:
+      - openid
+      - profile
+    defaultScopes:
+      - openid
+    consentImplied: true
+    accessTokenLifetime: 3600
+    refreshTokenLifetime: 86400
+    idTokenLifetime: 3600

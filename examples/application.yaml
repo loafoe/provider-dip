@@ -1,0 +1,14 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-application
+    description: An example application
+    propositionRef:
+      name: example-proposition
+    globalReferenceId: example-application-global-id

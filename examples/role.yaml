@@ -1,0 +1,16 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: example-role
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-role
+    description: An example role with permissions
+    managingOrganizationRef:
+      name: example-org
+    permissions:
+      - PERMISSION_READ
+      - PERMISSION_WRITE

@@ -1,0 +1,17 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: example-user
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    loginId: example.user@example.com
+    email: example.user@example.com
+    firstName: Example
+    lastName: User
+    organizationRef:
+      name: example-org
+    preferredLanguage: en-US
+    preferredCommunicationChannel: email

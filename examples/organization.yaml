@@ -1,0 +1,13 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  name: example-org
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-organization
+    displayName: Example Organization
+    description: An example organization created via Crossplane
+    type: Hospital

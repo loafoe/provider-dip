@@ -1,0 +1,21 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Service
+metadata:
+  name: example-service
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-service
+    description: An example service identity
+    applicationRef:
+      name: example-application
+    scopes:
+      - openid
+      - profile
+    defaultScopes:
+      - openid
+    accessTokenLifetime: 3600
+    refreshTokenLifetime: 86400
+    tokenEndpointAuthMethod: private_key_jwt

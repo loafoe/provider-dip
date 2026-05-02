@@ -1,0 +1,14 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Proposition
+metadata:
+  name: example-proposition
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-proposition
+    description: An example proposition
+    organizationRef:
+      name: example-org
+    globalReferenceId: example-proposition-global-id

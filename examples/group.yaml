@@ -1,0 +1,13 @@
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  name: example-group
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    name: example-group
+    description: An example group
+    managingOrganizationRef:
+      name: example-org

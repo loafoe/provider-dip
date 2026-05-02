@@ -1,0 +1,29 @@
+apiVersion: dip.m.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: default
+  namespace: crossplane-system
+spec:
+  region: us-east
+  environment: client-test
+  credentials:
+    source: Secret
+    secretRef:
+      name: dip-credentials
+      namespace: crossplane-system
+      key: credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dip-credentials
+  namespace: crossplane-system
+type: Opaque
+stringData:
+  credentials: |
+    {
+      "region": "us-east",
+      "environment": "client-test",
+      "service_id": "your-service-uuid",
+      "service_private_key": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+    }
