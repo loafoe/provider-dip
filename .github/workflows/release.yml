@@ -54,6 +54,7 @@ jobs:
         run: |
           digest=$(ko build ./cmd/provider \
             --bare \
+            --sbom=none \
             --tags=${{ github.ref_name }},latest \
             --platform=linux/amd64,linux/arm64)
           echo "digest=$digest" >> $GITHUB_OUTPUT
