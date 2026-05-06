@@ -13,7 +13,6 @@ permissions:
 env:
   GO_VERSION: '1.26'
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   release:
@@ -43,14 +42,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get version
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+      - name: Get image name
+        id: image
+        run: echo "name=${{ env.REGISTRY }}/${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Build and push with ko
         id: ko
         env:
-          KO_DOCKER_REPO: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          KO_DOCKER_REPO: ${{ steps.image.outputs.name }}
         run: |
           digest=$(ko build ./cmd/provider \
             --bare \
@@ -70,7 +69,7 @@ jobs:
           DIGEST: ${{ steps.ko.outputs.digest }}
         run: |
           cosign verify $DIGEST \
-            --certificate-identity-regexp="https://github.com/${{ github.repository }}/*" \
+            --certificate-identity-regexp="https://github.com/${GITHUB_REPOSITORY}/*" \
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 
       - name: Generate SBOM
