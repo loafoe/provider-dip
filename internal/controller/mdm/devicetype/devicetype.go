@@ -116,6 +116,10 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.Wrap(err, errNewClient)
 	}
 
+	if dipClient.MDM == nil {
+		return nil, errors.New("MDM is not available for the configured region/environment")
+	}
+
 	return &external{client: dipClient}, nil
 }
 

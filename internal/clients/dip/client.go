@@ -81,22 +81,27 @@ func NewClient(cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("failed to authenticate service identity '%s': %w", cfg.ServiceID, err)
 	}
 
-	// Create MDM client using the authenticated IAM client
+	// Create MDM client using the authenticated IAM client. MDM is not
+	// available in every region/environment (e.g. us-east preview only exposes
+	// IAM/IDM), so treat an unresolvable endpoint as "MDM not configured"
+	// rather than a fatal error. MDM controllers surface a clear error if a
+	// user tries to manage MDM resources without it.
 	mdmClient, err := mdm.NewClient(iamClient, &mdm.Config{
 		Region:      cfg.Region,
 		Environment: cfg.Environment,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create MDM client: %w", err)
+		mdmClient = nil
 	}
 
-	// Create Provisioning client using the authenticated IAM client
+	// Create Provisioning client using the authenticated IAM client. Same
+	// availability caveat as MDM above.
 	provisioningClient, err := provisioning.NewClient(iamClient, &provisioning.Config{
 		Region:      cfg.Region,
 		Environment: cfg.Environment,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Provisioning client: %w", err)
+		provisioningClient = nil
 	}
 
 	return &Client{IAM: iamClient, MDM: mdmClient, Provisioning: provisioningClient}, nil
