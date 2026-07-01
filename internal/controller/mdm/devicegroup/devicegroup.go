@@ -66,6 +66,12 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		opts = append(opts, managed.WithManagementPolicies())
 	}
 
+	// DIP assigns the external name (a GUID) at creation time, so disable the
+	// default NameAsExternalName initializer. Otherwise the external name is
+	// briefly set to the CR name, which cross-resource reference resolvers can
+	// cache before the real GUID is known.
+	opts = append(opts, managed.WithInitializers())
+
 	r := managed.NewReconciler(mgr, resource.ManagedKind(mdmv1alpha1.DeviceGroupGroupVersionKind), opts...)
 
 	return ctrl.NewControllerManagedBy(mgr).
