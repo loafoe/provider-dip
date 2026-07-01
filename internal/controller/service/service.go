@@ -208,7 +208,35 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	meta.SetExternalName(cr, created.ID)
 
-	return managed.ExternalCreation{}, nil
+	// Record the observable identity fields. DIP only returns the private key
+	// once, at creation time, so we surface it (and the service id) via the
+	// connection secret referenced by writeConnectionSecretToRef.
+	cr.Status.AtProvider.ID = &created.ID
+	cr.Status.AtProvider.ServiceID = &created.ServiceID
+	if created.OrganizationID != "" {
+		cr.Status.AtProvider.OrganizationID = &created.OrganizationID
+	}
+	if created.ExpiresOn != "" {
+		cr.Status.AtProvider.ExpiresOn = &created.ExpiresOn
+	}
+
+	return managed.ExternalCreation{ConnectionDetails: connectionDetails(created)}, nil
+}
+
+// connectionDetails assembles the credential material returned by DIP at
+// service creation. The private key is only ever returned once, here.
+func connectionDetails(s *iam.Service) managed.ConnectionDetails {
+	conn := managed.ConnectionDetails{"serviceId": []byte(s.ServiceID)}
+	if s.PrivateKey != "" {
+		conn["privateKey"] = []byte(s.PrivateKey)
+	}
+	if s.OrganizationID != "" {
+		conn["organizationId"] = []byte(s.OrganizationID)
+	}
+	if s.ExpiresOn != "" {
+		conn["expiresOn"] = []byte(s.ExpiresOn)
+	}
+	return conn
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {

@@ -1,0 +1,56 @@
+# Demonstrates the reference resolvers end-to-end:
+#   Proposition.organizationRef  -> Organization (dipccorg)   => organizationId
+#   Application.propositionRef   -> Proposition               => propositionId
+#   Service.applicationRef       -> Application               => applicationId
+#
+# The Service writes its generated credentials (serviceId + privateKey) to the
+# Secret named in writeConnectionSecretToRef.
+---
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Proposition
+metadata:
+  name: dipccproposition
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  forProvider:
+    name: DIPCCProposition
+    description: Proposition created via Crossplane reference chain
+    globalReferenceId: dipcc-proposition-ref
+    organizationRef:
+      name: dipccorg
+---
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: dipccapplication
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  forProvider:
+    name: DIPCCApplication
+    description: Application created via Crossplane reference chain
+    globalReferenceId: dipcc-application-ref
+    propositionRef:
+      name: dipccproposition
+---
+apiVersion: iam.dip.m.crossplane.io/v1alpha1
+kind: Service
+metadata:
+  name: dipccservice
+  namespace: crossplane-system
+spec:
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  writeConnectionSecretToRef:
+    name: dipccservice-credentials
+  forProvider:
+    name: DIPCCService
+    description: Service identity created via Crossplane reference chain
+    applicationRef:
+      name: dipccapplication
