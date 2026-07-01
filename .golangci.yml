@@ -88,6 +88,13 @@ linters:
       - linters:
           - staticcheck
         text: 'SA3000:'
+      # GetEventRecorderFor is deprecated in controller-runtime v0.23+, but
+      # crossplane-runtime's event.NewAPIRecorder still requires the old
+      # record.EventRecorder it returns. Revisit once crossplane-runtime
+      # migrates to the new events API.
+      - linters:
+          - staticcheck
+        text: 'SA1019:.*GetEventRecorderFor'
       - linters:
           - gosec
         text: 'G101:'

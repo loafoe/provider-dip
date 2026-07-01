@@ -22,8 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // RoleParameters are the configurable fields of a Role.
@@ -65,14 +64,14 @@ type RoleObservation struct {
 
 // RoleSpec defines the desired state of a Role.
 type RoleSpec struct {
-	xpv2.ManagedResourceSpec `json:",inline"`
+	xpv1.ManagedResourceSpec `json:",inline"`
 	ForProvider              RoleParameters `json:"forProvider"`
 }
 
 // RoleStatus represents the observed state of a Role.
 type RoleStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          RoleObservation `json:"atProvider,omitempty"`
+	xpv1.ManagedResourceStatus `json:",inline"`
+	AtProvider                 RoleObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

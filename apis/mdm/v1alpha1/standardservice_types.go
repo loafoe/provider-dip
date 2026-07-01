@@ -22,8 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
+	xpv1 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // ServiceURL represents a service URL configuration.
@@ -91,14 +90,14 @@ type StandardServiceObservation struct {
 
 // StandardServiceSpec defines the desired state of an MDM StandardService.
 type StandardServiceSpec struct {
-	xpv2.ManagedResourceSpec `json:",inline"`
+	xpv1.ManagedResourceSpec `json:",inline"`
 	ForProvider              StandardServiceParameters `json:"forProvider"`
 }
 
 // StandardServiceStatus represents the observed state of an MDM StandardService.
 type StandardServiceStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          StandardServiceObservation `json:"atProvider,omitempty"`
+	xpv1.ManagedResourceStatus `json:",inline"`
+	AtProvider                 StandardServiceObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
