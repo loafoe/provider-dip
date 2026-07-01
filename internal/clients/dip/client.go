@@ -33,6 +33,11 @@ type Config struct {
 	Environment       string
 	ServiceID         string
 	ServicePrivateKey string
+	// TokenAudience optionally overrides the JWT "aud" claim used for service
+	// login. Required for Keycloak-backed IAM realms (e.g. the us-east preview
+	// environment) that validate against the realm issuer rather than the
+	// access token endpoint.
+	TokenAudience string
 }
 
 // Client wraps go-dip-api IAM, MDM, and Provisioning clients.
@@ -59,8 +64,9 @@ func NewClient(cfg Config) (*Client, error) {
 
 	// Create IAM client
 	iamClient, err := iam.NewClient(nil, &iam.Config{
-		Region:      cfg.Region,
-		Environment: cfg.Environment,
+		Region:        cfg.Region,
+		Environment:   cfg.Environment,
+		TokenAudience: cfg.TokenAudience,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create IAM client: %w", err)
@@ -109,6 +115,7 @@ func ConfigFromSecret(specRegion, specEnv string, secretData []byte) (Config, er
 		Environment:       specEnv,
 		ServiceID:         creds["service_id"],
 		ServicePrivateKey: creds["service_private_key"],
+		TokenAudience:     creds["token_audience"],
 	}
 
 	// Secret values override spec values
