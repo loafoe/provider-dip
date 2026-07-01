@@ -58,15 +58,18 @@ type ClientParameters struct {
 
 	// ApplicationID is the application GUID this client belongs to.
 	// +optional
+	// +crossplane:generate:reference:type=Application
+	// +crossplane:generate:reference:refFieldName=ApplicationRef
+	// +crossplane:generate:reference:selectorFieldName=ApplicationSelector
 	ApplicationID *string `json:"applicationId,omitempty"`
 
 	// ApplicationRef references an Application.
 	// +optional
-	ApplicationRef *xpv1.Reference `json:"applicationRef,omitempty"`
+	ApplicationRef *xpv1.NamespacedReference `json:"applicationRef,omitempty"`
 
 	// ApplicationSelector selects an Application.
 	// +optional
-	ApplicationSelector *xpv1.Selector `json:"applicationSelector,omitempty"`
+	ApplicationSelector *xpv1.NamespacedSelector `json:"applicationSelector,omitempty"`
 
 	// GlobalReferenceID is a global unique identifier. Immutable after creation.
 	// +kubebuilder:validation:Required

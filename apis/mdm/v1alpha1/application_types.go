@@ -37,8 +37,19 @@ type ApplicationParameters struct {
 	Description *string `json:"description,omitempty"`
 
 	// PropositionID is the MDM proposition ID this application belongs to.
-	// +kubebuilder:validation:Required
-	PropositionID string `json:"propositionId"`
+	// +optional
+	// +crossplane:generate:reference:type=Proposition
+	// +crossplane:generate:reference:refFieldName=PropositionRef
+	// +crossplane:generate:reference:selectorFieldName=PropositionSelector
+	PropositionID *string `json:"propositionId,omitempty"`
+
+	// PropositionRef references an MDM Proposition to populate propositionId.
+	// +optional
+	PropositionRef *xpv1.NamespacedReference `json:"propositionRef,omitempty"`
+
+	// PropositionSelector selects an MDM Proposition to populate propositionId.
+	// +optional
+	PropositionSelector *xpv1.NamespacedSelector `json:"propositionSelector,omitempty"`
 
 	// GlobalReferenceID is a globally unique reference identifier.
 	// +kubebuilder:validation:Required

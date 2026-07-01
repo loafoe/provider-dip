@@ -37,8 +37,19 @@ type DeviceGroupParameters struct {
 	Description *string `json:"description,omitempty"`
 
 	// ApplicationID is the MDM application ID this device group belongs to.
-	// +kubebuilder:validation:Required
-	ApplicationID string `json:"applicationId"`
+	// +optional
+	// +crossplane:generate:reference:type=Application
+	// +crossplane:generate:reference:refFieldName=ApplicationRef
+	// +crossplane:generate:reference:selectorFieldName=ApplicationSelector
+	ApplicationID *string `json:"applicationId,omitempty"`
+
+	// ApplicationRef references an MDM Application to populate applicationId.
+	// +optional
+	ApplicationRef *xpv1.NamespacedReference `json:"applicationRef,omitempty"`
+
+	// ApplicationSelector selects an MDM Application to populate applicationId.
+	// +optional
+	ApplicationSelector *xpv1.NamespacedSelector `json:"applicationSelector,omitempty"`
 
 	// DefaultGroupGUID is the default IAM group GUID.
 	// +optional

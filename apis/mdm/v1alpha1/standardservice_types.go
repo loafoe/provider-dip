@@ -38,7 +38,18 @@ type ServiceURL struct {
 
 	// AuthenticationMethodID references an authentication method for this URL.
 	// +optional
+	// +crossplane:generate:reference:type=AuthenticationMethod
+	// +crossplane:generate:reference:refFieldName=AuthenticationMethodRef
+	// +crossplane:generate:reference:selectorFieldName=AuthenticationMethodSelector
 	AuthenticationMethodID *string `json:"authenticationMethodId,omitempty"`
+
+	// AuthenticationMethodRef references an MDM AuthenticationMethod to populate authenticationMethodId.
+	// +optional
+	AuthenticationMethodRef *xpv1.NamespacedReference `json:"authenticationMethodRef,omitempty"`
+
+	// AuthenticationMethodSelector selects an MDM AuthenticationMethod to populate authenticationMethodId.
+	// +optional
+	AuthenticationMethodSelector *xpv1.NamespacedSelector `json:"authenticationMethodSelector,omitempty"`
 }
 
 // StandardServiceParameters are the configurable fields of an MDM StandardService.

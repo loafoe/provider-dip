@@ -107,12 +107,12 @@ func (in *ApplicationParameters) DeepCopyInto(out *ApplicationParameters) {
 	}
 	if in.PropositionRef != nil {
 		in, out := &in.PropositionRef, &out.PropositionRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.PropositionSelector != nil {
 		in, out := &in.PropositionSelector, &out.PropositionSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 }
@@ -291,12 +291,12 @@ func (in *ClientParameters) DeepCopyInto(out *ClientParameters) {
 	}
 	if in.ApplicationRef != nil {
 		in, out := &in.ApplicationRef, &out.ApplicationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ApplicationSelector != nil {
 		in, out := &in.ApplicationSelector, &out.ApplicationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.RedirectionURIs != nil {
@@ -474,12 +474,12 @@ func (in *EmailTemplateParameters) DeepCopyInto(out *EmailTemplateParameters) {
 	}
 	if in.ManagingOrganizationRef != nil {
 		in, out := &in.ManagingOrganizationRef, &out.ManagingOrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ManagingOrganizationSelector != nil {
 		in, out := &in.ManagingOrganizationSelector, &out.ManagingOrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Format != nil {
@@ -652,12 +652,12 @@ func (in *GroupParameters) DeepCopyInto(out *GroupParameters) {
 	}
 	if in.ManagingOrganizationRef != nil {
 		in, out := &in.ManagingOrganizationRef, &out.ManagingOrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ManagingOrganizationSelector != nil {
 		in, out := &in.ManagingOrganizationSelector, &out.ManagingOrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 }
@@ -810,12 +810,12 @@ func (in *OrganizationParameters) DeepCopyInto(out *OrganizationParameters) {
 	}
 	if in.ParentOrgRef != nil {
 		in, out := &in.ParentOrgRef, &out.ParentOrgRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ParentOrgSelector != nil {
 		in, out := &in.ParentOrgSelector, &out.ParentOrgSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Type != nil {
@@ -963,12 +963,12 @@ func (in *PasswordPolicyParameters) DeepCopyInto(out *PasswordPolicyParameters) 
 	}
 	if in.ManagingOrganizationRef != nil {
 		in, out := &in.ManagingOrganizationRef, &out.ManagingOrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ManagingOrganizationSelector != nil {
 		in, out := &in.ManagingOrganizationSelector, &out.ManagingOrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ExpiryPeriodInDays != nil {
@@ -1161,12 +1161,12 @@ func (in *PropositionParameters) DeepCopyInto(out *PropositionParameters) {
 	}
 	if in.OrganizationRef != nil {
 		in, out := &in.OrganizationRef, &out.OrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.OrganizationSelector != nil {
 		in, out := &in.OrganizationSelector, &out.OrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 }
@@ -1309,12 +1309,12 @@ func (in *RoleParameters) DeepCopyInto(out *RoleParameters) {
 	}
 	if in.ManagingOrganizationRef != nil {
 		in, out := &in.ManagingOrganizationRef, &out.ManagingOrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ManagingOrganizationSelector != nil {
 		in, out := &in.ManagingOrganizationSelector, &out.ManagingOrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Permissions != nil {
@@ -1477,12 +1477,12 @@ func (in *ServiceParameters) DeepCopyInto(out *ServiceParameters) {
 	}
 	if in.ApplicationRef != nil {
 		in, out := &in.ApplicationRef, &out.ApplicationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ApplicationSelector != nil {
 		in, out := &in.ApplicationSelector, &out.ApplicationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.PrivateKeySecretRef != nil {
@@ -1670,12 +1670,12 @@ func (in *UserParameters) DeepCopyInto(out *UserParameters) {
 	}
 	if in.OrganizationRef != nil {
 		in, out := &in.OrganizationRef, &out.OrganizationRef
-		*out = new(v1.Reference)
+		*out = new(v1.NamespacedReference)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.OrganizationSelector != nil {
 		in, out := &in.OrganizationSelector, &out.OrganizationSelector
-		*out = new(v1.Selector)
+		*out = new(v1.NamespacedSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.PreferredLanguage != nil {

@@ -39,15 +39,18 @@ type ApplicationParameters struct {
 
 	// PropositionID is the proposition GUID this application belongs to.
 	// +optional
+	// +crossplane:generate:reference:type=Proposition
+	// +crossplane:generate:reference:refFieldName=PropositionRef
+	// +crossplane:generate:reference:selectorFieldName=PropositionSelector
 	PropositionID *string `json:"propositionId,omitempty"`
 
 	// PropositionRef references a Proposition.
 	// +optional
-	PropositionRef *xpv1.Reference `json:"propositionRef,omitempty"`
+	PropositionRef *xpv1.NamespacedReference `json:"propositionRef,omitempty"`
 
 	// PropositionSelector selects a Proposition.
 	// +optional
-	PropositionSelector *xpv1.Selector `json:"propositionSelector,omitempty"`
+	PropositionSelector *xpv1.NamespacedSelector `json:"propositionSelector,omitempty"`
 
 	// GlobalReferenceID is a global unique identifier. Immutable after creation.
 	// +kubebuilder:validation:Required

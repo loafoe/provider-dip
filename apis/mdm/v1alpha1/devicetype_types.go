@@ -41,8 +41,19 @@ type DeviceTypeParameters struct {
 	CTN string `json:"ctn"`
 
 	// DeviceGroupID is the MDM device group ID this device type belongs to.
-	// +kubebuilder:validation:Required
-	DeviceGroupID string `json:"deviceGroupId"`
+	// +optional
+	// +crossplane:generate:reference:type=DeviceGroup
+	// +crossplane:generate:reference:refFieldName=DeviceGroupRef
+	// +crossplane:generate:reference:selectorFieldName=DeviceGroupSelector
+	DeviceGroupID *string `json:"deviceGroupId,omitempty"`
+
+	// DeviceGroupRef references an MDM DeviceGroup to populate deviceGroupId.
+	// +optional
+	DeviceGroupRef *xpv1.NamespacedReference `json:"deviceGroupRef,omitempty"`
+
+	// DeviceGroupSelector selects an MDM DeviceGroup to populate deviceGroupId.
+	// +optional
+	DeviceGroupSelector *xpv1.NamespacedSelector `json:"deviceGroupSelector,omitempty"`
 
 	// DefaultGroupGUID is the default IAM group GUID.
 	// +optional

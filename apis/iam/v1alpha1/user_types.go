@@ -47,15 +47,18 @@ type UserParameters struct {
 
 	// OrganizationID is the organization GUID this user belongs to.
 	// +optional
+	// +crossplane:generate:reference:type=Organization
+	// +crossplane:generate:reference:refFieldName=OrganizationRef
+	// +crossplane:generate:reference:selectorFieldName=OrganizationSelector
 	OrganizationID *string `json:"organizationId,omitempty"`
 
 	// OrganizationRef references an Organization.
 	// +optional
-	OrganizationRef *xpv1.Reference `json:"organizationRef,omitempty"`
+	OrganizationRef *xpv1.NamespacedReference `json:"organizationRef,omitempty"`
 
 	// OrganizationSelector selects an Organization.
 	// +optional
-	OrganizationSelector *xpv1.Selector `json:"organizationSelector,omitempty"`
+	OrganizationSelector *xpv1.NamespacedSelector `json:"organizationSelector,omitempty"`
 
 	// PreferredLanguage (e.g., en-US).
 	// +optional

@@ -39,15 +39,18 @@ type GroupParameters struct {
 
 	// ManagingOrganizationID is the organization GUID that manages this group.
 	// +optional
+	// +crossplane:generate:reference:type=Organization
+	// +crossplane:generate:reference:refFieldName=ManagingOrganizationRef
+	// +crossplane:generate:reference:selectorFieldName=ManagingOrganizationSelector
 	ManagingOrganizationID *string `json:"managingOrganizationId,omitempty"`
 
 	// ManagingOrganizationRef references an Organization.
 	// +optional
-	ManagingOrganizationRef *xpv1.Reference `json:"managingOrganizationRef,omitempty"`
+	ManagingOrganizationRef *xpv1.NamespacedReference `json:"managingOrganizationRef,omitempty"`
 
 	// ManagingOrganizationSelector selects an Organization.
 	// +optional
-	ManagingOrganizationSelector *xpv1.Selector `json:"managingOrganizationSelector,omitempty"`
+	ManagingOrganizationSelector *xpv1.NamespacedSelector `json:"managingOrganizationSelector,omitempty"`
 }
 
 // GroupObservation are the observable fields of a Group.

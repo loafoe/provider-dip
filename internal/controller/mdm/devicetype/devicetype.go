@@ -26,6 +26,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/philips-software/go-dip-api/connect/mdm"
 	"github.com/pkg/errors"
@@ -183,7 +184,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		Name:         fp.Name,
 		CTN:          fp.CTN,
 		DeviceGroupId: mdm.Reference{
-			Reference: fp.DeviceGroupID,
+			Reference: reference.FromPtrValue(fp.DeviceGroupID),
 		},
 	}
 
@@ -221,7 +222,7 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		Name:         fp.Name,
 		CTN:          fp.CTN,
 		DeviceGroupId: mdm.Reference{
-			Reference: fp.DeviceGroupID,
+			Reference: reference.FromPtrValue(fp.DeviceGroupID),
 		},
 	}
 

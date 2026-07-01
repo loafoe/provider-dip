@@ -9,6 +9,7 @@
 package v1alpha1
 
 import (
+	"github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -98,6 +99,21 @@ func (in *ApplicationParameters) DeepCopyInto(out *ApplicationParameters) {
 		in, out := &in.Description, &out.Description
 		*out = new(string)
 		**out = **in
+	}
+	if in.PropositionID != nil {
+		in, out := &in.PropositionID, &out.PropositionID
+		*out = new(string)
+		**out = **in
+	}
+	if in.PropositionRef != nil {
+		in, out := &in.PropositionRef, &out.PropositionRef
+		*out = new(v1.NamespacedReference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.PropositionSelector != nil {
+		in, out := &in.PropositionSelector, &out.PropositionSelector
+		*out = new(v1.NamespacedSelector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ApplicationGUID != nil {
 		in, out := &in.ApplicationGUID, &out.ApplicationGUID
@@ -397,6 +413,21 @@ func (in *DeviceGroupParameters) DeepCopyInto(out *DeviceGroupParameters) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ApplicationID != nil {
+		in, out := &in.ApplicationID, &out.ApplicationID
+		*out = new(string)
+		**out = **in
+	}
+	if in.ApplicationRef != nil {
+		in, out := &in.ApplicationRef, &out.ApplicationRef
+		*out = new(v1.NamespacedReference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.ApplicationSelector != nil {
+		in, out := &in.ApplicationSelector, &out.ApplicationSelector
+		*out = new(v1.NamespacedSelector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.DefaultGroupGUID != nil {
 		in, out := &in.DefaultGroupGUID, &out.DefaultGroupGUID
 		*out = new(string)
@@ -534,6 +565,21 @@ func (in *DeviceTypeParameters) DeepCopyInto(out *DeviceTypeParameters) {
 		in, out := &in.Description, &out.Description
 		*out = new(string)
 		**out = **in
+	}
+	if in.DeviceGroupID != nil {
+		in, out := &in.DeviceGroupID, &out.DeviceGroupID
+		*out = new(string)
+		**out = **in
+	}
+	if in.DeviceGroupRef != nil {
+		in, out := &in.DeviceGroupRef, &out.DeviceGroupRef
+		*out = new(v1.NamespacedReference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.DeviceGroupSelector != nil {
+		in, out := &in.DeviceGroupSelector, &out.DeviceGroupSelector
+		*out = new(v1.NamespacedSelector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.DefaultGroupGUID != nil {
 		in, out := &in.DefaultGroupGUID, &out.DefaultGroupGUID
@@ -746,6 +792,16 @@ func (in *ServiceURL) DeepCopyInto(out *ServiceURL) {
 		in, out := &in.AuthenticationMethodID, &out.AuthenticationMethodID
 		*out = new(string)
 		**out = **in
+	}
+	if in.AuthenticationMethodRef != nil {
+		in, out := &in.AuthenticationMethodRef, &out.AuthenticationMethodRef
+		*out = new(v1.NamespacedReference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.AuthenticationMethodSelector != nil {
+		in, out := &in.AuthenticationMethodSelector, &out.AuthenticationMethodSelector
+		*out = new(v1.NamespacedSelector)
+		(*in).DeepCopyInto(*out)
 	}
 }
 

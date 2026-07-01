@@ -45,15 +45,18 @@ type ChallengePolicyParameters struct {
 type PasswordPolicyParameters struct {
 	// ManagingOrganizationID is the organization GUID that manages this policy.
 	// +optional
+	// +crossplane:generate:reference:type=Organization
+	// +crossplane:generate:reference:refFieldName=ManagingOrganizationRef
+	// +crossplane:generate:reference:selectorFieldName=ManagingOrganizationSelector
 	ManagingOrganizationID *string `json:"managingOrganizationId,omitempty"`
 
 	// ManagingOrganizationRef references an Organization.
 	// +optional
-	ManagingOrganizationRef *xpv1.Reference `json:"managingOrganizationRef,omitempty"`
+	ManagingOrganizationRef *xpv1.NamespacedReference `json:"managingOrganizationRef,omitempty"`
 
 	// ManagingOrganizationSelector selects an Organization.
 	// +optional
-	ManagingOrganizationSelector *xpv1.Selector `json:"managingOrganizationSelector,omitempty"`
+	ManagingOrganizationSelector *xpv1.NamespacedSelector `json:"managingOrganizationSelector,omitempty"`
 
 	// ExpiryPeriodInDays before password must be changed.
 	// +optional

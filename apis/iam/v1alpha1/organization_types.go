@@ -43,15 +43,18 @@ type OrganizationParameters struct {
 
 	// ParentOrgID is the parent organization GUID.
 	// +optional
+	// +crossplane:generate:reference:type=Organization
+	// +crossplane:generate:reference:refFieldName=ParentOrgRef
+	// +crossplane:generate:reference:selectorFieldName=ParentOrgSelector
 	ParentOrgID *string `json:"parentOrgId,omitempty"`
 
 	// ParentOrgRef references an Organization to populate parentOrgId.
 	// +optional
-	ParentOrgRef *xpv1.Reference `json:"parentOrgRef,omitempty"`
+	ParentOrgRef *xpv1.NamespacedReference `json:"parentOrgRef,omitempty"`
 
 	// ParentOrgSelector selects an Organization to populate parentOrgId.
 	// +optional
-	ParentOrgSelector *xpv1.Selector `json:"parentOrgSelector,omitempty"`
+	ParentOrgSelector *xpv1.NamespacedSelector `json:"parentOrgSelector,omitempty"`
 
 	// Type of the organization (e.g., Hospital).
 	// +optional
